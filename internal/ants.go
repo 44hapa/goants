@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"github.com/davecgh/go-spew/spew"
 	"io"
 	"log"
 	"os"
@@ -14,6 +15,8 @@ import (
 // Bot interface defines what we need from a bot
 type Bot interface {
 	DoTurn(s *State) error
+	GetNearestAnt(foodLocal Location, s *State) (Location, int)
+	FeelMyAntByFood(locFood Location, s *State)
 }
 
 var stdin = bufio.NewReader(os.Stdin)
@@ -30,25 +33,19 @@ type State struct {
 	SpawnRadius2  int   //spawn radius squared
 	PlayerSeed    int64 //random player seed
 	Turn          int   //current turn number
+	StartLog      bool
 
 	Map *Map
 }
 
 // Start takes the initial parameters from stdin
 func (s *State) Start() error {
-	//log.Println("START!!! 1")
-
-	//python tools/playgame.py "python MyBot.py" "python tools/sample_bots/python/HunterBot.py" --map_file tools/maps/example/tutorial1.map --log_dir game_logs --turns 60 --scenario --food none --player_seed 7 --verbose -e
 	for {
-		//log.Println("START!!! 2")
 		line, err := stdin.ReadString('\n')
-		//log.Println("START!!! 3")
 		if err != nil {
 			return err
 		}
-		//log.Println("START!!! 4")
 		line = line[:len(line)-1] //remove the delimiter
-		//log.Println("START!!! 5")
 
 		if line == "" {
 			continue
@@ -244,4 +241,32 @@ func (s *State) IssueOrderLoc(loc Location, d Direction) {
 // endTurn is called by Loop, you don't need to call it.
 func (s *State) endTurn() {
 	os.Stdout.Write([]byte("go\n"))
+}
+
+func (s *State) LogToFile(v ...any) {
+	if v == nil || len(v) == 0 {
+		return
+	}
+	var f *os.File
+	var err error
+	fileName := "/tmp/ants.log"
+	if s.StartLog == false {
+		f, err = os.Create(fileName)
+		if err != nil {
+			log.Fatalf("error create file: %v", err)
+		}
+		s.StartLog = true
+	}
+	f, err = os.OpenFile(fileName, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatalf("error opening file: %v", err)
+	}
+	//defer f.Close()
+	wrt := io.MultiWriter(os.Stdout, f)
+	//wrt := io.Writer(f)
+	log.SetOutput(wrt)
+	log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 1")
+	spew.Fdump(wrt, v)
+	log.Println(v...)
+	log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 2")
 }

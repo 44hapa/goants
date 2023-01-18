@@ -3,8 +3,8 @@ PROJECT_NAME=ants
 
 #include $(GOROOT)/src/Make.inc
 
-export GO111MODULE=off
-GOENV:=GO111MODULE=off
+export GO111MODULE=on
+GOENV:=GO111MODULE=on
 
 TARG=MyBot
 GOFILES=\
@@ -24,3 +24,7 @@ build:
 .PHONY: run
 run:
 	$(GOENV) go run cmd/main.go
+
+.PHONY: test
+test:
+	$(GOENV) go test ./... -test.v

@@ -330,10 +330,10 @@ func (m *Map) FromLocation(loc Location) (Row, Col int) {
 type Direction int
 
 const (
-	North Direction = iota
-	East
-	South
-	West
+	North Direction = iota // Север
+	East                   // Восток
+	South                  // Юг
+	West                   // Запад
 
 	NoMovement
 )

@@ -1,6 +1,8 @@
 package internal
 
 import (
+	"fmt"
+	"github.com/davecgh/go-spew/spew"
 	"testing"
 )
 
@@ -16,6 +18,7 @@ func TestMap(t *testing.T) {
 	}
 
 	loc := m.FromRowCol(3, 2)
+
 	row, col := m.FromLocation(loc)
 	if row != 3 || col != 2 {
 		t.Errorf("conversion broken, got (%v, %v), wanted (3, 2)", row, col)
@@ -51,6 +54,10 @@ func TestMap(t *testing.T) {
 	m.AddHill(m.FromRowCol(0, 0), HILL_1)
 	m.AddHill(m.FromRowCol(1, 0), HILL_1)
 	m.AddAnt(m.FromRowCol(1, 0), ANT_1)
+	//fmt.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 1")
+	//fmt.Println(m.String())
+	//fmt.Println(m.FromLocation(w))
+	//fmt.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 2")
 
 	if m.String() != `1 . b 
 B . . 
@@ -59,4 +66,38 @@ A 0 .
 ` {
 		t.Errorf("map put ants in wrong place, got `%s`", m)
 	}
+}
+
+func TestMyBot_GetNextStep(t *testing.T) {
+	m := NewMap(5, 5)
+	food1 := m.FromRowCol(2, 2)
+	food2 := m.FromRowCol(3, 3)
+	myAnt := m.FromRowCol(0, 0)
+	m.AddAnt(myAnt, MY_ANT)
+	m.AddFood(food1)
+	m.AddFood(food2)
+
+	var s State
+	s.Map = m
+	bot := NewBot(&s)
+	loc1, near1 := bot.GetNearestAnt(food1, &s)
+	loc2, near2 := bot.GetNearestAnt(food2, &s)
+
+	fmt.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Near 1")
+	spew.Dump(m.FromLocation(loc1))
+	spew.Dump(loc1)
+	spew.Dump(near1)
+	fmt.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Near 2")
+	fmt.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Near 3")
+	spew.Dump(m.FromLocation(loc2))
+	spew.Dump(loc2)
+	spew.Dump(near2)
+	fmt.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Near 4")
+
+	bot.FeelMyAntByFood(food1, &s)
+	bot.FeelMyAntByFood(food2, &s)
+
+	fmt.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Near 5")
+	spew.Dump(bot)
+	fmt.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Near 6")
 }
