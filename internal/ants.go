@@ -15,8 +15,8 @@ import (
 // Bot interface defines what we need from a bot
 type Bot interface {
 	DoTurn(s *State) error
-	GetNearestAnt(foodLocal Location, s *State) (Location, int)
-	FeelMyAntByFood(locFood Location, s *State)
+	//GetNearestAnt(foodLocal Location, s *State) (Location, int)
+	//FeelMyAntByFood(locFood Location, s *State)
 }
 
 var stdin = bufio.NewReader(os.Stdin)
@@ -265,8 +265,6 @@ func (s *State) LogToFile(v ...any) {
 	wrt := io.MultiWriter(os.Stdout, f)
 	//wrt := io.Writer(f)
 	log.SetOutput(wrt)
-	log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 1")
 	spew.Fdump(wrt, v)
 	log.Println(v...)
-	log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 2")
 }

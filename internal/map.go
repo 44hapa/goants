@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"fmt"
 	"log"
 )
 
@@ -324,6 +325,20 @@ func (m *Map) FromLocation(loc Location) (Row, Col int) {
 	Row = int(loc) / m.Cols
 	Col = int(loc) % m.Cols
 	return
+}
+
+// FromLocationAnts returns an (Row, Col) pair given a Location to all ants
+func (m *Map) FromLocationAnts(bot MyBot) []string {
+	resul := []string{}
+	for loc, ant := range bot.MyAnts {
+		rowAnt := int(loc) / m.Cols
+		colAnt := int(loc) % m.Cols
+		rowGoal := int(ant.Goal) / m.Cols
+		colGoal := int(ant.Goal) % m.Cols
+		res := fmt.Sprintf("antLoc: %d/%d  goalLoc: %d/%d", rowAnt, colAnt, rowGoal, colGoal)
+		resul = append(resul, res)
+	}
+	return resul
 }
 
 // Direction represents the direction concept for issuing orders.

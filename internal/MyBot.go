@@ -2,7 +2,6 @@ package internal
 
 import (
 	"math"
-	"math/rand"
 	"sort"
 )
 
@@ -15,13 +14,17 @@ type MyAnt struct {
 }
 
 type MyBot struct {
-	MyAnts map[Location]MyAnt // Мапа всех муравьев. Ключи - текущая координата муравья
+	MyAnts  map[Location]MyAnt // Мапа всех муравьев. Ключи - текущая координата муравья
+	MaxRows int
+	MaxCell int
 }
 
 // NewBot creates a new instance of your bot
-func NewBot(s *State) Bot {
+func NewBot(s *State) *MyBot {
 	//ants := make([]Ant, len(s.Map.Ants) - 1)
 	mb := &MyBot{
+		MaxCell: s.Cols,
+		MaxRows: s.Rows,
 		//Ants: ants,
 		//do any necessary initialization here
 	}
@@ -64,18 +67,35 @@ func (mb *MyBot) DoTurnByFood(s *State) error {
 }
 
 func (mb *MyBot) FeelMyAntByFood(locFood Location, s *State) {
+	// Ближайший доступный муравей
 	antLoc, steps := mb.GetNearestAnt(locFood, s)
 
-	myAnt := MyAnt{
-		GoalType:   FOOD, // Пока по умолчанию идем за едой
-		Goal:       locFood,
-		StepToGoal: steps,
+	//row1, cel1 := s.Map.FromLocation(antLoc)
+	//fmt.Println("nearANT : row/cel", row1, "/", cel1)
+
+	// Нет муравья
+	if steps == 0 {
+		return
 	}
-	//TODO: !!!!!!
-	if _, ok := mb.MyAnts[antLoc]; !ok {
+
+	if mb.MyAnts == nil {
 		mb.MyAnts = map[Location]MyAnt{}
 	}
-	mb.MyAnts[antLoc] = myAnt
+
+	if _, ok := mb.MyAnts[antLoc]; !ok {
+		mb.MyAnts[antLoc] = MyAnt{}
+	}
+
+	if mb.MyAnts[antLoc].StepToGoal == 0 || mb.MyAnts[antLoc].StepToGoal > steps {
+		// Если цель ближе
+
+		mb.MyAnts[antLoc] = MyAnt{
+			GoalType:   FOOD, // Пока по умолчанию идем за едой
+			Goal:       locFood,
+			StepToGoal: steps,
+		}
+	}
+
 }
 
 func (mb *MyBot) FeelMyAnt(loc Location, id Item, s *State) {
@@ -100,19 +120,22 @@ func (mb *MyBot) GetNearestAnt(foodLocal Location, s *State) (Location, int) {
 			continue
 		}
 		// Если у мураша уже есть задача
-		if filledAnt, ok := mb.MyAnts[loc]; ok {
-			if filledAnt.Goal != Location(0) {
-				continue
-			}
-		}
+		//if filledAnt, ok := mb.MyAnts[loc]; ok {
+		//	if filledAnt.Goal != Location(0) {
+		//		continue
+		//	}
+		//}
 		newNear = mb.GetDistance(foodLocal, loc, s)
 		if near > newNear {
 			near = newNear
 			result = loc
 		}
 	}
-	// Пометим еду как назначеную
-	s.Map.Food[result] = false
+
+	if result != Location(0) {
+		// Пометим еду как назначеную
+		s.Map.Food[result] = false
+	}
 	return result, near
 }
 
@@ -184,7 +207,7 @@ func (mb *MyBot) NextSteps(s *State) {
 		}
 
 		if myAnt, ok := mb.MyAnts[loc]; ok {
-			row, cel = mb.PossibleMoveDirections(loc, myAnt.Goal, s)
+			row, cel = mb.PossibleMoveDirections(loc, myAnt, s)
 			if row != NoMovement {
 				loc2 := s.Map.Move(loc, row)
 				if s.Map.SafeDestination(loc2) {
@@ -200,10 +223,9 @@ func (mb *MyBot) NextSteps(s *State) {
 				}
 			}
 		}
-
 		// По умолчанию идем в темноту
 		darkLoc, _ := mb.GetNearestDark(loc, s)
-		row, cel = mb.PossibleMoveDirections(loc, darkLoc, s)
+		row, cel = mb.PossibleMoveDirections(loc, MyAnt{Goal: darkLoc}, s)
 		if row != NoMovement {
 			loc2 := s.Map.Move(loc, row)
 			if s.Map.SafeDestination(loc2) {
@@ -212,44 +234,62 @@ func (mb *MyBot) NextSteps(s *State) {
 			}
 		}
 
-		continue
-		dirs := []Direction{North, East, South, West}
-		p := rand.Perm(4)
-		for _, i := range p {
-			d := dirs[i]
-
-			loc2 := s.Map.Move(loc, d)
-			if s.Map.SafeDestination(loc2) {
-				s.IssueOrderLoc(loc, d)
-				//there's also an s.IssueOrderRowCol if you don't have a Location handy
-				break
-			}
-		}
+		//continue
+		//dirs := []Direction{North, East, South, West}
+		//p := rand.Perm(4)
+		//for _, i := range p {
+		//	d := dirs[i]
+		//
+		//	loc2 := s.Map.Move(loc, d)
+		//	if s.Map.SafeDestination(loc2) {
+		//		s.IssueOrderLoc(loc, d)
+		//		//there's also an s.IssueOrderRowCol if you don't have a Location handy
+		//		break
+		//	}
+		//}
 	}
 
 	return
 }
 
-func (mb *MyBot) PossibleMoveDirections(antLoc Location, goalLoc Location, s *State) (Direction, Direction) {
+func (mb *MyBot) PossibleMoveDirections(antLoc Location, myAnt MyAnt, s *State) (Direction, Direction) {
+	goalLoc := myAnt.Goal
 	resRow := NoMovement
 	resCol := NoMovement
-	if goalLoc == 0 {
+	if goalLoc == Location(0) {
 		return resRow, resCol
 	}
 	antRow, antCol := s.Map.FromLocation(antLoc)
 	goalRow, goalCol := s.Map.FromLocation(goalLoc)
 
 	if antRow > goalRow {
-		resRow = North
+		if (antRow - goalRow) < mb.MaxRows/2 {
+			resRow = North
+		} else {
+			resRow = South
+		}
 	}
 	if antRow < goalRow {
-		resRow = South
+		if (goalRow - antRow) < mb.MaxRows/2 {
+			resRow = South
+		} else {
+			resRow = North
+		}
 	}
 	if antCol > goalCol {
-		resCol = West
+		if (antCol - goalCol) < mb.MaxCell/2 {
+			resCol = West
+		} else {
+			resCol = East
+		}
 	}
 	if antCol < goalCol {
-		resCol = East
+		if (goalCol - antCol) < mb.MaxCell/2 {
+			resCol = East
+		} else {
+			resCol = West
+		}
+
 	}
 	return resRow, resCol
 }
