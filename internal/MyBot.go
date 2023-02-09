@@ -23,8 +23,8 @@ type MyBot struct {
 func NewBot(s *State) *MyBot {
 	//ants := make([]Ant, len(s.Map.Ants) - 1)
 	mb := &MyBot{
-		MaxCell: s.Cols,
-		MaxRows: s.Rows,
+		MaxCell: s.Map.Cols,
+		MaxRows: s.Map.Rows,
 		//Ants: ants,
 		//do any necessary initialization here
 	}
@@ -224,15 +224,15 @@ func (mb *MyBot) NextSteps(s *State) {
 			}
 		}
 		// По умолчанию идем в темноту
-		darkLoc, _ := mb.GetNearestDark(loc, s)
-		row, cel = mb.PossibleMoveDirections(loc, MyAnt{Goal: darkLoc}, s)
-		if row != NoMovement {
-			loc2 := s.Map.Move(loc, row)
-			if s.Map.SafeDestination(loc2) {
-				s.IssueOrderLoc(loc, row)
-				continue
-			}
-		}
+		//darkLoc, _ := mb.GetNearestDark(loc, s)
+		//row, cel = mb.PossibleMoveDirections(loc, MyAnt{Goal: darkLoc}, s)
+		//if row != NoMovement {
+		//	loc2 := s.Map.Move(loc, row)
+		//	if s.Map.SafeDestination(loc2) {
+		//		s.IssueOrderLoc(loc, row)
+		//		continue
+		//	}
+		//}
 
 		//continue
 		//dirs := []Direction{North, East, South, West}
@@ -263,28 +263,28 @@ func (mb *MyBot) PossibleMoveDirections(antLoc Location, myAnt MyAnt, s *State) 
 	goalRow, goalCol := s.Map.FromLocation(goalLoc)
 
 	if antRow > goalRow {
-		if (antRow - goalRow) < mb.MaxRows/2 {
+		if float64(antRow-goalRow) < float64(mb.MaxRows/2) {
 			resRow = North
 		} else {
 			resRow = South
 		}
 	}
 	if antRow < goalRow {
-		if (goalRow - antRow) < mb.MaxRows/2 {
+		if float64(goalRow-antRow) < float64(mb.MaxRows)/2 {
 			resRow = South
 		} else {
 			resRow = North
 		}
 	}
 	if antCol > goalCol {
-		if (antCol - goalCol) < mb.MaxCell/2 {
+		if float64(antCol-goalCol) < float64(mb.MaxCell)/2 {
 			resCol = West
 		} else {
 			resCol = East
 		}
 	}
 	if antCol < goalCol {
-		if (goalCol - antCol) < mb.MaxCell/2 {
+		if float64(goalCol-antCol) < float64(mb.MaxCell)/2 {
 			resCol = East
 		} else {
 			resCol = West

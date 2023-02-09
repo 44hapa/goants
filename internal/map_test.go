@@ -1,8 +1,6 @@
 package internal
 
 import (
-	"fmt"
-	"github.com/davecgh/go-spew/spew"
 	"testing"
 )
 
@@ -91,7 +89,7 @@ func TestMyBot_FeelMyAntByFood_1(t *testing.T) {
 		t.Errorf("муравью2 назначена не ближняя еда, хотел цель `%d` а получил `%d`", bot.MyAnts[myAnt2].Goal, food2)
 	}
 
-	//fmt.Println(s.Map.String())
+	////fmt.Println(s.Map.String())
 }
 
 // Две еды, один муравей
@@ -116,7 +114,7 @@ func TestMyBot_FeelMyAntByFood_2(t *testing.T) {
 		t.Errorf("муравью1 назначена не ближняя еде, got `%d`", bot.MyAnts[myAnt1].Goal)
 	}
 
-	//fmt.Println(s.Map.String())
+	////fmt.Println(s.Map.String())
 }
 
 // Два муравья, одина еда
@@ -140,7 +138,7 @@ func TestMyBot_FeelMyAntByFood_3(t *testing.T) {
 		t.Errorf("муравью1 назначена не ближняя еде, got `%d`", bot.MyAnts[myAnt2].Goal)
 	}
 
-	//fmt.Println(s.Map.String())
+	////fmt.Println(s.Map.String())
 }
 
 // У одного муравья есть цель, значит у него должно быть направление
@@ -163,7 +161,7 @@ func TestMyBot_PossibleMoveDirections_1(t *testing.T) {
 	bot.FeelMyAntByFood(food1, &s)
 
 	row1, cel1 := bot.PossibleMoveDirections(myAnt1, bot.MyAnts[myAnt1], &s)
-	row2, cel2 := bot.PossibleMoveDirections(myAnt1, bot.MyAnts[myAnt2], &s)
+	row2, cel2 := bot.PossibleMoveDirections(myAnt2, bot.MyAnts[myAnt2], &s)
 
 	if bot.MyAnts[myAnt1].Goal != Location(0) {
 		t.Errorf("у муравья1 не должно быть цели, got `%d`", bot.MyAnts[myAnt1].Goal)
@@ -181,8 +179,8 @@ func TestMyBot_PossibleMoveDirections_1(t *testing.T) {
 	if row2.String() != North.String() {
 		t.Errorf("у муравья2 должно быть движения по вертикали на `%s`, got `%s`", North, row2)
 	}
-	if cel2.String() != East.String() {
-		t.Errorf("у муравья2 должно быть движения по горизонтали на `%s`, got `%s`", East, cel2)
+	if cel2.String() != West.String() {
+		t.Errorf("у муравья2 должно быть движения по горизонтали на `%s`, got `%s`", West, cel2)
 	}
 
 	//fmt.Println(s.Map.String())
@@ -272,7 +270,7 @@ func TestMyBot_PossibleMoveDirections_3(t *testing.T) {
 	if cel1.String() != NoMovement.String() {
 		t.Errorf("у муравья1 не должно быть движения по горизонтали на `%s`, got `%s`", NoMovement, cel1)
 	}
-	//fmt.Println(s.Map.String())
+	////fmt.Println(s.Map.String())
 }
 
 // Один муравей, две еды (не идет по горизонтали 1)
@@ -302,7 +300,7 @@ func TestMyBot_PossibleMoveDirections_4(t *testing.T) {
 	if cel1.String() != East.String() {
 		t.Errorf("у муравья1 должно быть движения по горизонтали на `%s`, got `%s`", East, cel1)
 	}
-	//fmt.Println(s.Map.String())
+	////fmt.Println(s.Map.String())
 }
 
 // Один муравей, две еды (не идет по горизонтали 2)
@@ -350,11 +348,6 @@ func TestMyBot_PossibleMoveDirections_6(t *testing.T) {
 
 	bot.FeelMyAntByFood(food1, &s)
 	row1, cel1 := bot.PossibleMoveDirections(myAnt1, bot.MyAnts[myAnt1], &s)
-	fmt.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> POSSSSS 1")
-	spew.Dump(row1)
-	spew.Dump(cel1)
-	fmt.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> POSSSSS 2")
-
 	if bot.MyAnts[myAnt1].Goal != food1 {
 		botRow, botCel := s.Map.FromLocation(bot.MyAnts[myAnt1].Goal)
 		foodRow, foodCel := s.Map.FromLocation(food1)
@@ -366,7 +359,7 @@ func TestMyBot_PossibleMoveDirections_6(t *testing.T) {
 	if cel1.String() != NoMovement.String() {
 		t.Errorf("у муравья1 не должно быть движения по горизонтали на `%s`, got `%s`", NoMovement, cel1)
 	}
-	fmt.Println(s.Map.String())
+	//fmt.Println(s.Map.String())
 }
 
 func TestMyBot_DoTurnByFood_1(t *testing.T) {
@@ -396,21 +389,21 @@ func TestMyBot_DoTurnByFood_1(t *testing.T) {
 	m.AddFood(food4)
 
 	bot.DoTurnByFood(&s)
-	//fmt.Println(s.Map.String())
+	////fmt.Println(s.Map.String())
 
 	//fmt.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> qwe 1")
 	//spew.Dump(s.Map.FromLocationAnts(*bot))
 	//spew.Dump(bot.MyAnts)
 	//fmt.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> qwe 2")
 
-	//fmt.Println(s.Map.String())
+	////fmt.Println(s.Map.String())
 	bot.NextSteps(&s)
 	//fmt.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> bot 1")
 	//spew.Dump(bot)
 	//fmt.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> bot 2")
 	//
 	//bot.DoTurnByFood(&s)
-	//fmt.Println(s.Map.String())
+	////fmt.Println(s.Map.String())
 	//bot.NextSteps(&s)
 
 }
