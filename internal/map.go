@@ -182,6 +182,35 @@ func NewMap(Rows, Cols int) *Map {
 	return m
 }
 
+func (m *Map) SortAntsByLocation() []Location {
+	keys := make([]Location, 0, len(m.Ants))
+	for key := range m.Ants {
+		keys = append(keys, key)
+	}
+
+	//sort.SliceStable(keys, func(i, j int) bool {
+	//	return i < j
+	//})
+
+	return keys
+}
+
+func (m *Map) SortFoodByLocation() []Location {
+	keys := make([]Location, 0)
+	for key, fill := range m.Food {
+		//Если не выставлена цель == true
+		if fill == true {
+			keys = append(keys, key)
+		}
+	}
+
+	//sort.SliceStable(keys, func(i, j int) bool {
+	//	return i < j
+	//})
+
+	return keys
+}
+
 // String returns an ascii diagram of the map.
 func (m *Map) String() string {
 	str := ""
@@ -191,6 +220,37 @@ func (m *Map) String() string {
 			str += string([]byte{s}) + " "
 		}
 		str += "\n"
+	}
+	return str
+}
+
+func (m *Map) StringNum() string {
+	//maxSeparate := math.Max(float64(m.Cols), float64(m.Rows))
+	//separate := strings.Repeat(" ", len(fmt.Sprint(maxSeparate))) + " "
+	separate := "  "
+	str := ""
+	colNum := 0
+	rowNum := 0
+	for row := 0; row < m.Rows; row++ {
+		for col := 0; col < m.Cols; col++ {
+			if colNum == 0 {
+				str += " " + separate + fmt.Sprint(colNum) + separate
+				colNum++
+			}
+			if row == 0 && colNum != 0 && colNum < m.Cols {
+				str += fmt.Sprint(colNum) + separate
+				colNum++
+			}
+		}
+		str += "\n"
+		str += fmt.Sprint(rowNum) + separate
+		rowNum++
+
+		for col := 0; col < m.Cols; col++ {
+			s := m.itemGrid[row*m.Cols+col].Symbol()
+			str += string([]byte{s}) + separate
+		}
+
 	}
 	return str
 }
@@ -328,14 +388,36 @@ func (m *Map) FromLocation(loc Location) (Row, Col int) {
 }
 
 // FromLocationAnts returns an (Row, Col) pair given a Location to all ants
-func (m *Map) FromLocationAnts(bot MyBot) []string {
+func (m *Map) FromLocationMyAnts(bot MyBot) []string {
 	resul := []string{}
 	for loc, ant := range bot.MyAnts {
 		rowAnt := int(loc) / m.Cols
 		colAnt := int(loc) % m.Cols
 		rowGoal := int(ant.Goal) / m.Cols
 		colGoal := int(ant.Goal) % m.Cols
-		res := fmt.Sprintf("antLoc: %d/%d  goalLoc: %d/%d", rowAnt, colAnt, rowGoal, colGoal)
+		res := fmt.Sprintf("antLoc row/col: %d/%d  goalLoc row/col: %d/%d", rowAnt, colAnt, rowGoal, colGoal)
+		resul = append(resul, res)
+	}
+	return resul
+}
+
+func (m *Map) FromLocationMapAnts() []string {
+	resul := []string{}
+	for loc := range m.Ants {
+		rowAnt := int(loc) / m.Cols
+		colAnt := int(loc) % m.Cols
+		res := fmt.Sprintf("antLoc [loc:%d] - row/col: %d/%d", loc, rowAnt, colAnt)
+		resul = append(resul, res)
+	}
+	return resul
+}
+
+func (m *Map) FromLocationMapFoods() []string {
+	resul := []string{}
+	for loc, isBool := range m.Food {
+		rowFood := int(loc) / m.Cols
+		colFood := int(loc) % m.Cols
+		res := fmt.Sprintf("foodLoc [loc:%d] - row/col: %d/%d - isBool: %t", loc, rowFood, colFood, isBool)
 		resul = append(resul, res)
 	}
 	return resul

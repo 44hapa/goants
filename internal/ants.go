@@ -15,6 +15,7 @@ import (
 // Bot interface defines what we need from a bot
 type Bot interface {
 	DoTurn(s *State) error
+	ClearMyAnts(s *State)
 	//GetNearestAnt(foodLocal Location, s *State) (Location, int)
 	//FeelMyAntByFood(locFood Location, s *State)
 }
@@ -120,6 +121,9 @@ func (s *State) Loop(b Bot, BetweenTurnWork func()) error {
 		}
 
 		if line == "go" {
+
+			// Зачистим мапу с моими муравьями
+			b.ClearMyAnts(s)
 			b.DoTurn(s)
 
 			//end turn
@@ -266,5 +270,5 @@ func (s *State) LogToFile(v ...any) {
 	//wrt := io.Writer(f)
 	log.SetOutput(wrt)
 	spew.Fdump(wrt, v)
-	log.Println(v...)
+	//log.Println(v...)
 }
